@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2016 Fukuta,Shinya
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +38,10 @@ import android.widget.Toast;
 import com.example.android.displayingbitmaps.BuildConfig;
 import com.example.android.displayingbitmaps.R;
 import com.example.android.displayingbitmaps.provider.Images;
+import com.example.android.displayingbitmaps.util.AndroidDiskEnvironment;
 import com.example.android.displayingbitmaps.util.ImageCache;
 import com.example.android.displayingbitmaps.util.ImageFetcher;
+import com.example.android.displayingbitmaps.util.RetainFragmentFactory;
 import com.example.android.displayingbitmaps.util.Utils;
 
 public class ImageDetailActivity extends FragmentActivity implements OnClickListener {
@@ -73,12 +76,12 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
         final int longest = (height > width ? height : width) / 2;
 
         ImageCache.ImageCacheParams cacheParams =
-                new ImageCache.ImageCacheParams(this, IMAGE_CACHE_DIR);
+                new ImageCache.ImageCacheParams(new AndroidDiskEnvironment(this), IMAGE_CACHE_DIR);
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        mImageFetcher = new ImageFetcher(this, longest);
-        mImageFetcher.addImageCache(getSupportFragmentManager(), cacheParams);
+        mImageFetcher = new ImageFetcher(this, new AndroidDiskEnvironment(this), longest);
+        mImageFetcher.addImageCache(new RetainFragmentFactory(getSupportFragmentManager()), cacheParams);
         mImageFetcher.setImageFadeIn(false);
 
         // Set up ViewPager and backing adapter

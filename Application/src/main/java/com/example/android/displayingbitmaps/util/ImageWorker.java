@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2016 Fukuta,Shinya
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +25,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.widget.ImageView;
 
 import com.example.android.common.logger.Log;
@@ -57,8 +56,11 @@ public abstract class ImageWorker {
     private static final int MESSAGE_FLUSH = 2;
     private static final int MESSAGE_CLOSE = 3;
 
-    protected ImageWorker(Context context) {
+    private final DiskEnvironment mDiskEnvironment;
+
+    protected ImageWorker(Context context, DiskEnvironment env) {
         mResources = context.getResources();
+        mDiskEnvironment = env;
     }
 
     /**
@@ -144,10 +146,10 @@ public abstract class ImageWorker {
      * @param fragmentManager
      * @param cacheParams The cache parameters to use for the image cache.
      */
-    public void addImageCache(FragmentManager fragmentManager,
+    public void addImageCache(ImageCache.ObjectHolderFactory factory,
             ImageCache.ImageCacheParams cacheParams) {
         mImageCacheParams = cacheParams;
-        mImageCache = ImageCache.getInstance(fragmentManager, mImageCacheParams);
+        mImageCache = ImageCache.getInstance(factory, mImageCacheParams);
         new CacheAsyncTask().execute(MESSAGE_INIT_DISK_CACHE);
     }
 
@@ -158,9 +160,9 @@ public abstract class ImageWorker {
      * @param diskCacheDirectoryName See
      * {@link ImageCache.ImageCacheParams#ImageCacheParams(android.content.Context, String)}.
      */
-    public void addImageCache(FragmentActivity activity, String diskCacheDirectoryName) {
-        mImageCacheParams = new ImageCache.ImageCacheParams(activity, diskCacheDirectoryName);
-        mImageCache = ImageCache.getInstance(activity.getSupportFragmentManager(), mImageCacheParams);
+    public void addImageCache(ImageCache.ObjectHolderFactory factory, String diskCacheDirectoryPath) {
+        mImageCacheParams = new ImageCache.ImageCacheParams(mDiskEnvironment, diskCacheDirectoryPath);
+        mImageCache = ImageCache.getInstance(factory, mImageCacheParams);
         new CacheAsyncTask().execute(MESSAGE_INIT_DISK_CACHE);
     }
 

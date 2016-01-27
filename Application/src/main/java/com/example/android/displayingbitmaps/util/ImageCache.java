@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2016 Fukuta,Shinya
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +18,12 @@
 package com.example.android.displayingbitmaps.util;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build.VERSION_CODES;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.StatFs;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.util.LruCache;
 
 import com.example.android.common.logger.Log;
@@ -98,23 +93,23 @@ public class ImageCache {
      * Return an {@link ImageCache} instance. A {@link RetainFragment} is used to retain the
      * ImageCache object across configuration changes such as a change in device orientation.
      *
-     * @param fragmentManager The fragment manager to use when dealing with the retained fragment.
+     * @param objectHolderFactory FIXME The fragment manager to use when dealing with the retained fragment.
      * @param cacheParams The cache parameters to use if the ImageCache needs instantiation.
      * @return An existing retained ImageCache object or a new one if one did not exist
      */
     public static ImageCache getInstance(
-            FragmentManager fragmentManager, ImageCacheParams cacheParams) {
+            ObjectHolderFactory objectHolderFactory, ImageCacheParams cacheParams) {
 
         // Search for, or create an instance of the non-UI RetainFragment
-        final RetainFragment mRetainFragment = findOrCreateRetainFragment(fragmentManager);
+        final ObjectHolder mObjectHolder = objectHolderFactory.getObjectHolderInstance();
 
         // See if we already have an ImageCache stored in RetainFragment
-        ImageCache imageCache = (ImageCache) mRetainFragment.getObject();
+        ImageCache imageCache = (ImageCache) mObjectHolder.getObject();
 
         // No existing ImageCache, create one and store it in RetainFragment
         if (imageCache == null) {
             imageCache = new ImageCache(cacheParams);
-            mRetainFragment.setObject(imageCache);
+            mObjectHolder.setObject(imageCache);
         }
 
         return imageCache;
@@ -475,6 +470,8 @@ public class ImageCache {
         public boolean diskCacheEnabled = DEFAULT_DISK_CACHE_ENABLED;
         public boolean initDiskCacheOnCreate = DEFAULT_INIT_DISK_CACHE_ON_CREATE;
 
+        public final DiskEnvironment diskEnvironment;
+
         /**
          * Create a set of image cache parameters that can be provided to
          * {@link ImageCache#getInstance(android.support.v4.app.FragmentManager, ImageCacheParams)} or
@@ -484,8 +481,9 @@ public class ImageCache {
          *                               application cache directory. Usually "cache" or "images"
          *                               is sufficient.
          */
-        public ImageCacheParams(Context context, String diskCacheDirectoryName) {
-            diskCacheDir = getDiskCacheDir(context, diskCacheDirectoryName);
+        public ImageCacheParams(DiskEnvironment env, String diskCacheDirectoryName) {
+            diskCacheDir = env.getDiskCacheDir(diskCacheDirectoryName);
+            diskEnvironment = env;
         }
 
         /**
@@ -555,24 +553,6 @@ public class ImageCache {
     }
 
     /**
-     * Get a usable cache directory (external if available, internal otherwise).
-     *
-     * @param context The context to use
-     * @param uniqueName A unique directory name to append to the cache dir
-     * @return The cache dir
-     */
-    public static File getDiskCacheDir(Context context, String uniqueName) {
-        // Check if media is mounted or storage is built-in, if so, try and use external cache dir
-        // otherwise use internal cache dir
-        final String cachePath =
-                Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-                        !isExternalStorageRemovable() ? getExternalCacheDir(context).getPath() :
-                                context.getCacheDir().getPath();
-
-        return new File(cachePath + File.separator + uniqueName);
-    }
-
-    /**
      * A hashing method that changes a string (like a URL) into a hash suitable for using as a
      * disk filename.
      */
@@ -627,112 +607,18 @@ public class ImageCache {
         return bitmap.getRowBytes() * bitmap.getHeight();
     }
 
-    /**
-     * Check if external storage is built-in or removable.
-     *
-     * @return True if external storage is removable (like an SD card), false
-     *         otherwise.
-     */
-    @TargetApi(VERSION_CODES.GINGERBREAD)
-    public static boolean isExternalStorageRemovable() {
-        if (Utils.hasGingerbread()) {
-            return Environment.isExternalStorageRemovable();
-        }
-        return true;
+
+    public long getUsableSpace(File path) {
+        return mCacheParams.diskEnvironment.getUsableSpace(path);
     }
 
-    /**
-     * Get the external app cache directory.
-     *
-     * @param context The context to use
-     * @return The external cache dir
-     */
-    @TargetApi(VERSION_CODES.FROYO)
-    public static File getExternalCacheDir(Context context) {
-        if (Utils.hasFroyo()) {
-            return context.getExternalCacheDir();
-        }
-
-        // Before Froyo we need to construct the external cache dir ourselves
-        final String cacheDir = "/Android/data/" + context.getPackageName() + "/cache/";
-        return new File(Environment.getExternalStorageDirectory().getPath() + cacheDir);
+    public interface ObjectHolderFactory {
+        ObjectHolder getObjectHolderInstance();
     }
 
-    /**
-     * Check how much usable space is available at a given path.
-     *
-     * @param path The path to check
-     * @return The space available in bytes
-     */
-    @TargetApi(VERSION_CODES.GINGERBREAD)
-    public static long getUsableSpace(File path) {
-        if (Utils.hasGingerbread()) {
-            return path.getUsableSpace();
-        }
-        final StatFs stats = new StatFs(path.getPath());
-        return (long) stats.getBlockSize() * (long) stats.getAvailableBlocks();
+    public interface ObjectHolder {
+        Object getObject();
+
+        void setObject(Object object);
     }
-
-    /**
-     * Locate an existing instance of this Fragment or if not found, create and
-     * add it using FragmentManager.
-     *
-     * @param fm The FragmentManager manager to use.
-     * @return The existing instance of the Fragment or the new instance if just
-     *         created.
-     */
-    private static RetainFragment findOrCreateRetainFragment(FragmentManager fm) {
-        //BEGIN_INCLUDE(find_create_retain_fragment)
-        // Check to see if we have retained the worker fragment.
-        RetainFragment mRetainFragment = (RetainFragment) fm.findFragmentByTag(TAG);
-
-        // If not retained (or first time running), we need to create and add it.
-        if (mRetainFragment == null) {
-            mRetainFragment = new RetainFragment();
-            fm.beginTransaction().add(mRetainFragment, TAG).commitAllowingStateLoss();
-        }
-
-        return mRetainFragment;
-        //END_INCLUDE(find_create_retain_fragment)
-    }
-
-    /**
-     * A simple non-UI Fragment that stores a single Object and is retained over configuration
-     * changes. It will be used to retain the ImageCache object.
-     */
-    public static class RetainFragment extends Fragment {
-        private Object mObject;
-
-        /**
-         * Empty constructor as per the Fragment documentation
-         */
-        public RetainFragment() {}
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            // Make sure this Fragment is retained over a configuration change
-            setRetainInstance(true);
-        }
-
-        /**
-         * Store a single object in this Fragment.
-         *
-         * @param object The object to store
-         */
-        public void setObject(Object object) {
-            mObject = object;
-        }
-
-        /**
-         * Get the stored object.
-         *
-         * @return The stored object
-         */
-        public Object getObject() {
-            return mObject;
-        }
-    }
-
 }

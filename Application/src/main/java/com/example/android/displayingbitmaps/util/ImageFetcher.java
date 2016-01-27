@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2016 Fukuta,Shinya
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +60,9 @@ public class ImageFetcher extends ImageResizer {
      * @param imageWidth
      * @param imageHeight
      */
-    public ImageFetcher(Context context, int imageWidth, int imageHeight) {
-        super(context, imageWidth, imageHeight);
-        init(context);
+    public ImageFetcher(Context context, DiskEnvironment diskEnvironment, int imageWidth, int imageHeight) {
+        super(context, diskEnvironment, imageWidth, imageHeight);
+        init(context, diskEnvironment);
     }
 
     /**
@@ -70,14 +71,14 @@ public class ImageFetcher extends ImageResizer {
      * @param context
      * @param imageSize
      */
-    public ImageFetcher(Context context, int imageSize) {
-        super(context, imageSize);
-        init(context);
+    public ImageFetcher(Context context, DiskEnvironment diskEnvironment, int imageSize) {
+        super(context, diskEnvironment, imageSize);
+        init(context, diskEnvironment);
     }
 
-    private void init(Context context) {
+    private void init(Context context, DiskEnvironment diskEnvironment) {
         checkConnection(context);
-        mHttpCacheDir = ImageCache.getDiskCacheDir(context, HTTP_CACHE_DIR);
+        mHttpCacheDir = diskEnvironment.getDiskCacheDir(HTTP_CACHE_DIR);
     }
 
     @Override
@@ -91,7 +92,7 @@ public class ImageFetcher extends ImageResizer {
             mHttpCacheDir.mkdirs();
         }
         synchronized (mHttpDiskCacheLock) {
-            if (ImageCache.getUsableSpace(mHttpCacheDir) > HTTP_CACHE_SIZE) {
+            if (getImageCache().getUsableSpace(mHttpCacheDir) > HTTP_CACHE_SIZE) {
                 try {
                     mHttpDiskCache = DiskLruCache.open(mHttpCacheDir, 1, 1, HTTP_CACHE_SIZE);
                     if (BuildConfig.DEBUG) {

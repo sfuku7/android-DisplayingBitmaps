@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2016 Fukuta,Shinya
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +46,8 @@ public class ImageResizer extends ImageWorker {
      * @param imageWidth
      * @param imageHeight
      */
-    public ImageResizer(Context context, int imageWidth, int imageHeight) {
-        super(context);
+    public ImageResizer(Context context, DiskEnvironment diskEnvironment, int imageWidth, int imageHeight) {
+        super(context, diskEnvironment);
         setImageSize(imageWidth, imageHeight);
     }
 
@@ -56,8 +57,8 @@ public class ImageResizer extends ImageWorker {
      * @param context
      * @param imageSize
      */
-    public ImageResizer(Context context, int imageSize) {
-        super(context);
+    public ImageResizer(Context context, DiskEnvironment diskEnvironment, int imageSize) {
+        super(context, diskEnvironment);
         setImageSize(imageSize);
     }
 

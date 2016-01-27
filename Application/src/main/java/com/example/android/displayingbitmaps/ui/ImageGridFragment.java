@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2016 Fukuta,Shinya
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +24,7 @@ import android.content.Intent;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,8 +45,10 @@ import com.example.android.common.logger.Log;
 import com.example.android.displayingbitmaps.BuildConfig;
 import com.example.android.displayingbitmaps.R;
 import com.example.android.displayingbitmaps.provider.Images;
+import com.example.android.displayingbitmaps.util.AndroidDiskEnvironment;
 import com.example.android.displayingbitmaps.util.ImageCache;
 import com.example.android.displayingbitmaps.util.ImageFetcher;
+import com.example.android.displayingbitmaps.util.RetainFragmentFactory;
 import com.example.android.displayingbitmaps.util.Utils;
 
 /**
@@ -79,14 +83,15 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
         mAdapter = new ImageAdapter(getActivity());
 
         ImageCache.ImageCacheParams cacheParams =
-                new ImageCache.ImageCacheParams(getActivity(), IMAGE_CACHE_DIR);
+                new ImageCache.ImageCacheParams(new AndroidDiskEnvironment(getActivity()), IMAGE_CACHE_DIR);
 
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        mImageFetcher = new ImageFetcher(getActivity(), mImageThumbSize);
+        mImageFetcher = new ImageFetcher(getActivity(), new AndroidDiskEnvironment(getActivity()), mImageThumbSize);
         mImageFetcher.setLoadingImage(R.drawable.empty_photo);
-        mImageFetcher.addImageCache(getActivity().getSupportFragmentManager(), cacheParams);
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        mImageFetcher.addImageCache(new RetainFragmentFactory(fm), cacheParams);
     }
 
     @Override
