@@ -46,6 +46,7 @@ import com.example.android.displayingbitmaps.BuildConfig;
 import com.example.android.displayingbitmaps.R;
 import com.example.android.displayingbitmaps.provider.Images;
 import com.example.android.displayingbitmaps.util.AndroidDiskEnvironment;
+import com.example.android.displayingbitmaps.util.AndroidUiThreadAccessor;
 import com.example.android.displayingbitmaps.util.ImageCache;
 import com.example.android.displayingbitmaps.util.ImageFetcher;
 import com.example.android.displayingbitmaps.util.RetainFragmentFactory;
@@ -88,7 +89,7 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        mImageFetcher = new ImageFetcher(getActivity(), new AndroidDiskEnvironment(getActivity()), mImageThumbSize);
+        mImageFetcher = new ImageFetcher(getActivity(), new AndroidDiskEnvironment(getActivity()), new AndroidUiThreadAccessor(), mImageThumbSize);
         mImageFetcher.setLoadingImage(R.drawable.empty_photo);
         FragmentManager fm = getActivity().getSupportFragmentManager();
         mImageFetcher.addImageCache(new RetainFragmentFactory(fm), cacheParams);

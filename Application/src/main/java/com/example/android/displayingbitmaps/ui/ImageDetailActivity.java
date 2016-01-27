@@ -39,6 +39,7 @@ import com.example.android.displayingbitmaps.BuildConfig;
 import com.example.android.displayingbitmaps.R;
 import com.example.android.displayingbitmaps.provider.Images;
 import com.example.android.displayingbitmaps.util.AndroidDiskEnvironment;
+import com.example.android.displayingbitmaps.util.AndroidUiThreadAccessor;
 import com.example.android.displayingbitmaps.util.ImageCache;
 import com.example.android.displayingbitmaps.util.ImageFetcher;
 import com.example.android.displayingbitmaps.util.RetainFragmentFactory;
@@ -80,7 +81,7 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        mImageFetcher = new ImageFetcher(this, new AndroidDiskEnvironment(this), longest);
+        mImageFetcher = new ImageFetcher(this, new AndroidDiskEnvironment(this), new AndroidUiThreadAccessor(), longest);
         mImageFetcher.addImageCache(new RetainFragmentFactory(getSupportFragmentManager()), cacheParams);
         mImageFetcher.setImageFadeIn(false);
 

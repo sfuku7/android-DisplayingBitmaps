@@ -57,10 +57,12 @@ public abstract class ImageWorker {
     private static final int MESSAGE_CLOSE = 3;
 
     private final DiskEnvironment mDiskEnvironment;
+    private final AsyncTask.UiThreadAccessor mUiThreadAccessor;
 
-    protected ImageWorker(Context context, DiskEnvironment env) {
+    protected ImageWorker(Context context, DiskEnvironment env, AsyncTask.UiThreadAccessor accessor) {
         mResources = context.getResources();
         mDiskEnvironment = env;
+        mUiThreadAccessor = accessor;
     }
 
     /**
@@ -94,7 +96,7 @@ public abstract class ImageWorker {
             }
         } else if (cancelPotentialWork(data, imageView)) {
             //BEGIN_INCLUDE(execute_background_task)
-            final BitmapWorkerTask task = new BitmapWorkerTask(data, imageView, listener);
+            final BitmapWorkerTask task = new BitmapWorkerTask(mUiThreadAccessor, data, imageView, listener);
             final AsyncDrawable asyncDrawable =
                     new AsyncDrawable(mResources, mLoadingBitmap, task);
             imageView.setImageDrawable(asyncDrawable);
@@ -150,7 +152,7 @@ public abstract class ImageWorker {
             ImageCache.ImageCacheParams cacheParams) {
         mImageCacheParams = cacheParams;
         mImageCache = ImageCache.getInstance(factory, mImageCacheParams);
-        new CacheAsyncTask().execute(MESSAGE_INIT_DISK_CACHE);
+        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_INIT_DISK_CACHE);
     }
 
     /**
@@ -163,7 +165,7 @@ public abstract class ImageWorker {
     public void addImageCache(ImageCache.ObjectHolderFactory factory, String diskCacheDirectoryPath) {
         mImageCacheParams = new ImageCache.ImageCacheParams(mDiskEnvironment, diskCacheDirectoryPath);
         mImageCache = ImageCache.getInstance(factory, mImageCacheParams);
-        new CacheAsyncTask().execute(MESSAGE_INIT_DISK_CACHE);
+        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_INIT_DISK_CACHE);
     }
 
     /**
@@ -261,13 +263,15 @@ public abstract class ImageWorker {
         private final WeakReference<ImageView> imageViewReference;
         private final OnImageLoadedListener mOnImageLoadedListener;
 
-        public BitmapWorkerTask(Object data, ImageView imageView) {
+        public BitmapWorkerTask(UiThreadAccessor accessor, Object data, ImageView imageView) {
+            super(accessor);
             mData = data;
             imageViewReference = new WeakReference<ImageView>(imageView);
             mOnImageLoadedListener = null;
         }
 
-        public BitmapWorkerTask(Object data, ImageView imageView, OnImageLoadedListener listener) {
+        public BitmapWorkerTask(UiThreadAccessor accessor, Object data, ImageView imageView, OnImageLoadedListener listener) {
+            super(accessor);
             mData = data;
             imageViewReference = new WeakReference<ImageView>(imageView);
             mOnImageLoadedListener = listener;
@@ -473,6 +477,10 @@ public abstract class ImageWorker {
 
     protected class CacheAsyncTask extends AsyncTask<Object, Void, Void> {
 
+        CacheAsyncTask(UiThreadAccessor accessor) {
+            super(accessor);
+        }
+
         @Override
         protected Void doInBackground(Object... params) {
             switch ((Integer)params[0]) {
@@ -519,14 +527,14 @@ public abstract class ImageWorker {
     }
 
     public void clearCache() {
-        new CacheAsyncTask().execute(MESSAGE_CLEAR);
+        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_CLEAR);
     }
 
     public void flushCache() {
-        new CacheAsyncTask().execute(MESSAGE_FLUSH);
+        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_FLUSH);
     }
 
     public void closeCache() {
-        new CacheAsyncTask().execute(MESSAGE_CLOSE);
+        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_CLOSE);
     }
 }

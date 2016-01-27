@@ -46,8 +46,9 @@ public class ImageResizer extends ImageWorker {
      * @param imageWidth
      * @param imageHeight
      */
-    public ImageResizer(Context context, DiskEnvironment diskEnvironment, int imageWidth, int imageHeight) {
-        super(context, diskEnvironment);
+    public ImageResizer(Context context, DiskEnvironment diskEnvironment, AsyncTask.UiThreadAccessor accessor,
+                        int imageWidth, int imageHeight) {
+        super(context, diskEnvironment, accessor);
         setImageSize(imageWidth, imageHeight);
     }
 
@@ -57,8 +58,8 @@ public class ImageResizer extends ImageWorker {
      * @param context
      * @param imageSize
      */
-    public ImageResizer(Context context, DiskEnvironment diskEnvironment, int imageSize) {
-        super(context, diskEnvironment);
+    public ImageResizer(Context context, DiskEnvironment diskEnvironment, AsyncTask.UiThreadAccessor accessor, int imageSize) {
+        super(context, diskEnvironment, accessor);
         setImageSize(imageSize);
     }
 

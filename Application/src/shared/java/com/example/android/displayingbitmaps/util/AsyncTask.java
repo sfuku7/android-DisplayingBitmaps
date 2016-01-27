@@ -301,8 +301,8 @@ public abstract class AsyncTask<Params, Progress, Result> {
     /**
      * Creates a new asynchronous task. This constructor must be invoked on the UI thread.
      */
-    public AsyncTask() {
-        mUiThreadAccessor = new AndroidUiThreadAccessor();
+    public AsyncTask(UiThreadAccessor accessor) {
+        mUiThreadAccessor = accessor;
         mWorker = new WorkerRunnable<Params, Result>() {
             public Result call() throws Exception {
                 mTaskInvoked.set(true);

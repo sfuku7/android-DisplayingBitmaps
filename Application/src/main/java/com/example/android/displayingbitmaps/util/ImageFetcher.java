@@ -60,8 +60,9 @@ public class ImageFetcher extends ImageResizer {
      * @param imageWidth
      * @param imageHeight
      */
-    public ImageFetcher(Context context, DiskEnvironment diskEnvironment, int imageWidth, int imageHeight) {
-        super(context, diskEnvironment, imageWidth, imageHeight);
+    public ImageFetcher(Context context, DiskEnvironment diskEnvironment, AsyncTask.UiThreadAccessor accessor,
+                        int imageWidth, int imageHeight) {
+        super(context, diskEnvironment, accessor, imageWidth, imageHeight);
         init(context, diskEnvironment);
     }
 
@@ -71,8 +72,9 @@ public class ImageFetcher extends ImageResizer {
      * @param context
      * @param imageSize
      */
-    public ImageFetcher(Context context, DiskEnvironment diskEnvironment, int imageSize) {
-        super(context, diskEnvironment, imageSize);
+    public ImageFetcher(Context context, DiskEnvironment diskEnvironment, AsyncTask.UiThreadAccessor accessor,
+                        int imageSize) {
+        super(context, diskEnvironment, accessor, imageSize);
         init(context, diskEnvironment);
     }
 
