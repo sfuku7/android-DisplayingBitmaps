@@ -16,10 +16,7 @@
 
 package com.example.android.displayingbitmaps.util;
 
-import android.annotation.TargetApi;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Process;
+//import android.os.Process;
 
 import java.util.ArrayDeque;
 import java.util.concurrent.BlockingQueue;
@@ -233,7 +230,8 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private static final int MESSAGE_POST_RESULT = 0x1;
     private static final int MESSAGE_POST_PROGRESS = 0x2;
 
-    private static final InternalHandler sHandler = new InternalHandler();
+    //private static final InternalHandler sHandler = new InternalHandler();
+    private final UiThreadAccessor mUiThreadAccessor;
 
     private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;
     private final WorkerRunnable<Params, Result> mWorker;
@@ -244,7 +242,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private final AtomicBoolean mCancelled = new AtomicBoolean();
     private final AtomicBoolean mTaskInvoked = new AtomicBoolean();
 
-    @TargetApi(11)
+    //@TargetApi(11)
     private static class SerialExecutor implements Executor {
         final ArrayDeque<Runnable> mTasks = new ArrayDeque<Runnable>();
         Runnable mActive;
@@ -292,7 +290,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     /** @hide Used to force static handler to be created. */
     public static void init() {
-        sHandler.getLooper();
+        //sHandler.getLooper();
     }
 
     /** @hide */
@@ -304,11 +302,13 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * Creates a new asynchronous task. This constructor must be invoked on the UI thread.
      */
     public AsyncTask() {
+        mUiThreadAccessor = new AndroidUiThreadAccessor();
         mWorker = new WorkerRunnable<Params, Result>() {
             public Result call() throws Exception {
                 mTaskInvoked.set(true);
 
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                // TODO
+                //Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 //noinspection unchecked
                 return postResult(doInBackground(mParams));
             }
@@ -339,10 +339,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     private Result postResult(Result result) {
-        @SuppressWarnings("unchecked")
-        Message message = sHandler.obtainMessage(MESSAGE_POST_RESULT,
-                new AsyncTaskResult<Result>(this, result));
-        message.sendToTarget();
+        mUiThreadAccessor.postResult(this, result);
         return result;
     }
 
@@ -643,14 +640,13 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #onProgressUpdate
      * @see #doInBackground
      */
-    protected final void publishProgress(Progress... values) {
+    final void publishProgress(Progress... values) {
         if (!isCancelled()) {
-            sHandler.obtainMessage(MESSAGE_POST_PROGRESS,
-                    new AsyncTaskResult<Progress>(this, values)).sendToTarget();
+            mUiThreadAccessor.publishProgress(this, values);
         }
     }
 
-    private void finish(Result result) {
+    void finish(Result result) {
         if (isCancelled()) {
             onCancelled(result);
         } else {
@@ -659,35 +655,12 @@ public abstract class AsyncTask<Params, Progress, Result> {
         mStatus = Status.FINISHED;
     }
 
-    private static class InternalHandler extends Handler {
-        @SuppressWarnings({"unchecked", "RawUseOfParameterizedType"})
-        @Override
-        public void handleMessage(Message msg) {
-            AsyncTaskResult result = (AsyncTaskResult) msg.obj;
-            switch (msg.what) {
-                case MESSAGE_POST_RESULT:
-                    // There is only one result
-                    result.mTask.finish(result.mData[0]);
-                    break;
-                case MESSAGE_POST_PROGRESS:
-                    result.mTask.onProgressUpdate(result.mData);
-                    break;
-            }
-        }
-    }
-
     private static abstract class WorkerRunnable<Params, Result> implements Callable<Result> {
         Params[] mParams;
     }
 
-    @SuppressWarnings({"RawUseOfParameterizedType"})
-    private static class AsyncTaskResult<Data> {
-        final AsyncTask mTask;
-        final Data[] mData;
-
-        AsyncTaskResult(AsyncTask task, Data... data) {
-            mTask = task;
-            mData = data;
-        }
+    public interface UiThreadAccessor {
+        void publishProgress(AsyncTask task, Object... values);
+        void postResult(AsyncTask task, Object result);
     }
 }
