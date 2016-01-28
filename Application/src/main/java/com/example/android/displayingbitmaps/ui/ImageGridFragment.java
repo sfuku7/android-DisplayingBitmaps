@@ -45,10 +45,15 @@ import com.example.android.common.logger.Log;
 import com.example.android.displayingbitmaps.BuildConfig;
 import com.example.android.displayingbitmaps.R;
 import com.example.android.displayingbitmaps.provider.Images;
+import com.example.android.displayingbitmaps.util.AndroidBitmapDrawableFactory;
+import com.example.android.displayingbitmaps.util.AndroidBitmapFactory;
 import com.example.android.displayingbitmaps.util.AndroidDiskEnvironment;
+import com.example.android.displayingbitmaps.util.AndroidImageView;
+import com.example.android.displayingbitmaps.util.AndroidMemoryImageCacheFactory;
 import com.example.android.displayingbitmaps.util.AndroidUiThreadAccessor;
 import com.example.android.displayingbitmaps.util.ImageCache;
 import com.example.android.displayingbitmaps.util.ImageFetcher;
+import com.example.android.displayingbitmaps.util.MemoryImageCacheFactory;
 import com.example.android.displayingbitmaps.util.RetainFragmentFactory;
 import com.example.android.displayingbitmaps.util.Utils;
 
@@ -89,7 +94,11 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        mImageFetcher = new ImageFetcher(getActivity(), new AndroidDiskEnvironment(getActivity()), new AndroidUiThreadAccessor(), mImageThumbSize);
+        mImageFetcher = new ImageFetcher(getActivity(),
+                new AndroidBitmapFactory(getResources()),
+                new AndroidBitmapDrawableFactory(getResources()),
+                new AndroidMemoryImageCacheFactory(),
+                new AndroidDiskEnvironment(getActivity()), new AndroidUiThreadAccessor(), mImageThumbSize);
         mImageFetcher.setLoadingImage(R.drawable.empty_photo);
         FragmentManager fm = getActivity().getSupportFragmentManager();
         mImageFetcher.addImageCache(new RetainFragmentFactory(fm), cacheParams);
@@ -309,7 +318,8 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
 
             // Finally load the image asynchronously into the ImageView, this also takes care of
             // setting a placeholder image while the background thread runs
-            mImageFetcher.loadImage(Images.imageThumbUrls[position - mNumColumns], imageView);
+            mImageFetcher.loadImage(Images.imageThumbUrls[position - mNumColumns],
+                    new AndroidImageView(getResources(), imageView));
             return imageView;
             //END_INCLUDE(load_gridview_item)
         }

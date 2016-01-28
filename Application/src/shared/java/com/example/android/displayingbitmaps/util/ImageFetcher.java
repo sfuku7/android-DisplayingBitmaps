@@ -18,7 +18,6 @@
 package com.example.android.displayingbitmaps.util;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -60,9 +59,14 @@ public class ImageFetcher extends ImageResizer {
      * @param imageWidth
      * @param imageHeight
      */
-    public ImageFetcher(Context context, DiskEnvironment diskEnvironment, AsyncTask.UiThreadAccessor accessor,
+    public ImageFetcher(Context context,
+                        AbstractBitmapFactory bitmapFactory,
+                        AbstractBitmapDrawableFactory bitmapDrawableFactory,
+                        MemoryImageCacheFactory memoryImageCacheFactory,
+                        DiskEnvironment diskEnvironment,
+                        AsyncTask.UiThreadAccessor accessor,
                         int imageWidth, int imageHeight) {
-        super(context, diskEnvironment, accessor, imageWidth, imageHeight);
+        super(bitmapFactory, bitmapDrawableFactory, memoryImageCacheFactory, diskEnvironment, accessor, imageWidth, imageHeight);
         init(context, diskEnvironment);
     }
 
@@ -72,9 +76,14 @@ public class ImageFetcher extends ImageResizer {
      * @param context
      * @param imageSize
      */
-    public ImageFetcher(Context context, DiskEnvironment diskEnvironment, AsyncTask.UiThreadAccessor accessor,
+    public ImageFetcher(Context context,
+                        AbstractBitmapFactory bitmapFactory,
+                        AbstractBitmapDrawableFactory bitmapDrawableFactory,
+                        MemoryImageCacheFactory memoryImageCacheFactory,
+                        DiskEnvironment diskEnvironment,
+                        AsyncTask.UiThreadAccessor accessor,
                         int imageSize) {
-        super(context, diskEnvironment, accessor, imageSize);
+        super(bitmapFactory, bitmapDrawableFactory, memoryImageCacheFactory, diskEnvironment, accessor, imageSize);
         init(context, diskEnvironment);
     }
 
@@ -188,7 +197,7 @@ public class ImageFetcher extends ImageResizer {
      * @param data The data to load the bitmap, in this case, a regular http URL
      * @return The downloaded and resized bitmap
      */
-    private Bitmap processBitmap(String data) {
+    private AbstractBitmap processBitmap(String data) {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "processBitmap - " + data);
         }
@@ -242,9 +251,9 @@ public class ImageFetcher extends ImageResizer {
             }
         }
 
-        Bitmap bitmap = null;
+        AbstractBitmap bitmap = null;
         if (fileDescriptor != null) {
-            bitmap = decodeSampledBitmapFromDescriptor(fileDescriptor, mImageWidth,
+            bitmap = mBitmapFactory.decodeSampledBitmapFromDescriptor(fileDescriptor, mImageWidth,
                     mImageHeight, getImageCache());
         }
         if (fileInputStream != null) {
@@ -256,7 +265,7 @@ public class ImageFetcher extends ImageResizer {
     }
 
     @Override
-    protected Bitmap processBitmap(Object data) {
+    protected AbstractBitmap processBitmap(Object data) {
         return processBitmap(String.valueOf(data));
     }
 

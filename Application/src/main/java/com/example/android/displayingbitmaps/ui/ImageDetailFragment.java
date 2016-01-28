@@ -26,6 +26,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.example.android.displayingbitmaps.R;
+import com.example.android.displayingbitmaps.util.AndroidBitmap;
+import com.example.android.displayingbitmaps.util.AndroidImageView;
 import com.example.android.displayingbitmaps.util.ImageFetcher;
 import com.example.android.displayingbitmaps.util.ImageWorker;
 import com.example.android.displayingbitmaps.util.Utils;
@@ -36,7 +38,7 @@ import com.example.android.displayingbitmaps.util.Utils;
 public class ImageDetailFragment extends Fragment implements ImageWorker.OnImageLoadedListener {
     private static final String IMAGE_DATA_EXTRA = "extra_image_data";
     private String mImageUrl;
-    private ImageView mImageView;
+    private AndroidImageView mImageView;
     private ProgressBar mProgressBar;
     private ImageFetcher mImageFetcher;
 
@@ -76,7 +78,8 @@ public class ImageDetailFragment extends Fragment implements ImageWorker.OnImage
             Bundle savedInstanceState) {
         // Inflate and locate the main ImageView
         final View v = inflater.inflate(R.layout.image_detail_fragment, container, false);
-        mImageView = (ImageView) v.findViewById(R.id.imageView);
+        ImageView imageView = (ImageView) v.findViewById(R.id.imageView);
+        mImageView = new AndroidImageView(getResources(), imageView);
         mProgressBar = (ProgressBar) v.findViewById(R.id.progressbar);
         return v;
     }
