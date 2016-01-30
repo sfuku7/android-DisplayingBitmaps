@@ -34,29 +34,52 @@ public class AndroidImageView implements AbstractImageView {
 
     private final Resources mResources;
 
-    private final ImageView mImageView;
+    private final WeakReference<ImageView> mImageViewReference;
 
     public AndroidImageView(Resources res, ImageView imageView) {
         mResources = res;
-        mImageView = imageView;
+        mImageViewReference = new WeakReference<ImageView>(imageView);
     }
 
     public void setOnClickListener(View.OnClickListener l) {
-        mImageView.setOnClickListener(l);
+
+        ImageView imageView = mImageViewReference.get();
+        if (imageView == null) {
+            return;
+        }
+
+        imageView.setOnClickListener(l);
     }
+
+    @Override
+    public boolean hasOwner() {
+        return mImageViewReference.get() != null;
+    }
+
     @Override
     public void setImageDrawable(AbstractBitmapDrawable d) {
+
+        ImageView imageView = mImageViewReference.get();
+        if (imageView == null) {
+            return;
+        }
 
         if (!(d instanceof AndroidBitmapDrawable)) {
             Log.w(TAG, "invalid type");
             return;
         }
 
-        mImageView.setImageDrawable(((AndroidBitmapDrawable) d).bitmapDrawable);
+        imageView.setImageDrawable(((AndroidBitmapDrawable) d).bitmapDrawable);
     }
 
     @Override
     public void setFadeInImageDrawable(AbstractBitmap from, AbstractBitmapDrawable to, int durationMillis) {
+
+        ImageView imageView = mImageViewReference.get();
+        if (imageView == null) {
+            return;
+        }
+
         if (!(from instanceof AndroidBitmap) || !(to instanceof AndroidBitmapDrawable)) {
             Log.w(TAG, "invalid type, setFadeInImageDrawable");
             return;
@@ -69,15 +92,20 @@ public class AndroidImageView implements AbstractImageView {
                         ((AndroidBitmapDrawable)to).bitmapDrawable
                 });
         // Set background to loading bitmap
-        mImageView.setBackgroundDrawable(
+        imageView.setBackgroundDrawable(
                 new BitmapDrawable(mResources, ((AndroidBitmap)from).bitmap));
 
-        mImageView.setImageDrawable(td);
+        imageView.setImageDrawable(td);
         td.startTransition(durationMillis);
     }
 
     @Override
     public void setAsyncDrawable(AbstractBitmap loadingBitmap, ImageWorker.BitmapWorkerTask bitmapWorkerTask) {
+
+        ImageView imageView = mImageViewReference.get();
+        if (imageView == null) {
+            return;
+        }
 
         Bitmap bitmap;
         if (loadingBitmap != null) {
@@ -91,12 +119,18 @@ public class AndroidImageView implements AbstractImageView {
         }
 
         final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, bitmap, bitmapWorkerTask);
-        mImageView.setImageDrawable(asyncDrawable);
+        imageView.setImageDrawable(asyncDrawable);
     }
 
     @Override
     public ImageWorker.BitmapWorkerTask getBitmapWorkerTask() {
-        final Drawable drawable = mImageView.getDrawable();
+
+        ImageView imageView = mImageViewReference.get();
+        if (imageView == null) {
+            return null;
+        }
+
+        final Drawable drawable = imageView.getDrawable();
         if (drawable instanceof AsyncDrawable) {
             final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
             return asyncDrawable.getBitmapWorkerTask();

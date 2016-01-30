@@ -251,20 +251,20 @@ public abstract class ImageWorker {
      */
     class BitmapWorkerTask extends AsyncTask<Void, Void, AbstractBitmapDrawable> {
         private Object mData;
-        private final WeakReference<AbstractImageView> imageViewReference;
+        private final AbstractImageView mImageView;
         private final OnImageLoadedListener mOnImageLoadedListener;
 
         public BitmapWorkerTask(UiThreadAccessor accessor, Object data, AbstractImageView imageView) {
             super(accessor);
             mData = data;
-            imageViewReference = new WeakReference<AbstractImageView>(imageView);
+            mImageView = imageView;
             mOnImageLoadedListener = null;
         }
 
         public BitmapWorkerTask(UiThreadAccessor accessor, Object data, AbstractImageView imageView, OnImageLoadedListener listener) {
             super(accessor);
             mData = data;
-            imageViewReference = new WeakReference<AbstractImageView>(imageView);
+            mImageView = imageView;
             mOnImageLoadedListener = listener;
         }
 
@@ -367,11 +367,14 @@ public abstract class ImageWorker {
          * points to this task as well. Returns null otherwise.
          */
         private AbstractImageView getAttachedImageView() {
-            final AbstractImageView imageView = imageViewReference.get();
-            final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+            if (!mImageView.hasOwner()) {
+                return null;
+            }
+
+            final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(mImageView);
 
             if (this == bitmapWorkerTask) {
-                return imageView;
+                return mImageView;
             }
 
             return null;
