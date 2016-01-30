@@ -20,7 +20,7 @@ package com.example.android.displayingbitmaps.util;
 import com.example.android.displayingbitmaps.util.AbstractBitmap.CompressFormat;
 
 import com.example.android.common.logger.Log;
-import com.example.android.displayingbitmaps.BuildConfig;
+import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
 
 import java.io.File;
 import java.io.FileDescriptor;

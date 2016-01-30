@@ -35,8 +35,9 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
-import com.example.android.displayingbitmaps.BuildConfig;
-import com.example.android.displayingbitmaps.R;
+import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
+import com.example.android.j2objcdisplayingbitmaps.R;
+
 import com.example.android.displayingbitmaps.provider.Images;
 import com.example.android.displayingbitmaps.util.AndroidBitmapDrawableFactory;
 import com.example.android.displayingbitmaps.util.AndroidBitmapFactory;

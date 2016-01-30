@@ -24,8 +24,8 @@ import android.os.Build;
 import android.widget.Toast;
 
 import com.example.android.common.logger.Log;
-import com.example.android.displayingbitmaps.BuildConfig;
-import com.example.android.displayingbitmaps.R;
+import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
+import com.example.android.j2objcdisplayingbitmaps.R;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

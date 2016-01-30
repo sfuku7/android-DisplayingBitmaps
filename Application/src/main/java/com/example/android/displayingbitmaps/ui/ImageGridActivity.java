@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2016 Fukuta,Shinya
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +21,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 
-import com.example.android.displayingbitmaps.BuildConfig;
+import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
 import com.example.android.displayingbitmaps.util.Utils;
 
 /**

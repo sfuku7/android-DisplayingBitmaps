@@ -42,8 +42,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.android.common.logger.Log;
-import com.example.android.displayingbitmaps.BuildConfig;
-import com.example.android.displayingbitmaps.R;
+import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
+import com.example.android.j2objcdisplayingbitmaps.R;
 import com.example.android.displayingbitmaps.provider.Images;
 import com.example.android.displayingbitmaps.util.AndroidBitmapDrawableFactory;
 import com.example.android.displayingbitmaps.util.AndroidBitmapFactory;
@@ -53,7 +53,6 @@ import com.example.android.displayingbitmaps.util.AndroidMemoryImageCacheFactory
 import com.example.android.displayingbitmaps.util.AndroidUiThreadAccessor;
 import com.example.android.displayingbitmaps.util.ImageCache;
 import com.example.android.displayingbitmaps.util.ImageFetcher;
-import com.example.android.displayingbitmaps.util.MemoryImageCacheFactory;
 import com.example.android.displayingbitmaps.util.RetainFragmentFactory;
 import com.example.android.displayingbitmaps.util.Utils;
 
