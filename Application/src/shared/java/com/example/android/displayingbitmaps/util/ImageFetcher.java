@@ -17,15 +17,8 @@
 
 package com.example.android.displayingbitmaps.util;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Build;
-import android.widget.Toast;
-
 import com.example.android.common.logger.Log;
 import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
-import com.example.android.j2objcdisplayingbitmaps.R;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -52,6 +45,7 @@ public class ImageFetcher extends ImageResizer {
     private final Object mHttpDiskCacheLock = new Object();
     private static final int DISK_CACHE_INDEX = 0;
 
+    private final ConnectionChecker mConnectionChecker;
     /**
      * Initialize providing a target image width and height for the processing images.
      *
@@ -59,7 +53,7 @@ public class ImageFetcher extends ImageResizer {
      * @param imageWidth
      * @param imageHeight
      */
-    public ImageFetcher(Context context,
+    public ImageFetcher(ConnectionChecker connectionChecker,
                         AbstractBitmapFactory bitmapFactory,
                         AbstractBitmapDrawableFactory bitmapDrawableFactory,
                         MemoryImageCacheFactory memoryImageCacheFactory,
@@ -67,7 +61,8 @@ public class ImageFetcher extends ImageResizer {
                         AsyncTask.ThreadOperation accessor,
                         int imageWidth, int imageHeight) {
         super(bitmapFactory, bitmapDrawableFactory, memoryImageCacheFactory, diskEnvironment, accessor, imageWidth, imageHeight);
-        init(context, diskEnvironment);
+        init(connectionChecker, diskEnvironment);
+        mConnectionChecker = connectionChecker;
     }
 
     /**
@@ -76,7 +71,7 @@ public class ImageFetcher extends ImageResizer {
      * @param context
      * @param imageSize
      */
-    public ImageFetcher(Context context,
+    public ImageFetcher(ConnectionChecker connectionChecker,
                         AbstractBitmapFactory bitmapFactory,
                         AbstractBitmapDrawableFactory bitmapDrawableFactory,
                         MemoryImageCacheFactory memoryImageCacheFactory,
@@ -84,11 +79,12 @@ public class ImageFetcher extends ImageResizer {
                         AsyncTask.ThreadOperation accessor,
                         int imageSize) {
         super(bitmapFactory, bitmapDrawableFactory, memoryImageCacheFactory, diskEnvironment, accessor, imageSize);
-        init(context, diskEnvironment);
+        init(connectionChecker, diskEnvironment);
+        mConnectionChecker = connectionChecker;
     }
 
-    private void init(Context context, DiskEnvironment diskEnvironment) {
-        checkConnection(context);
+    private void init(ConnectionChecker connectionChecker, DiskEnvironment diskEnvironment) {
+        connectionChecker.checkConnection();
         mHttpCacheDir = diskEnvironment.getDiskCacheDir(HTTP_CACHE_DIR);
     }
 
@@ -172,21 +168,6 @@ public class ImageFetcher extends ImageResizer {
                     Log.e(TAG, "closeCacheInternal - " + e);
                 }
             }
-        }
-    }
-
-    /**
-    * Simple network connection check.
-    *
-    * @param context
-    */
-    private void checkConnection(Context context) {
-        final ConnectivityManager cm =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        final NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        if (networkInfo == null || !networkInfo.isConnectedOrConnecting()) {
-            Toast.makeText(context, R.string.no_network_connection_toast, Toast.LENGTH_LONG).show();
-            Log.e(TAG, "checkConnection - no connection found");
         }
     }
 
@@ -276,7 +257,7 @@ public class ImageFetcher extends ImageResizer {
      * @return true if successful, false otherwise
      */
     public boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
-        disableConnectionReuseIfNecessary();
+        mConnectionChecker.disableConnectionReuseIfNecessary();
         HttpURLConnection urlConnection = null;
         BufferedOutputStream out = null;
         BufferedInputStream in = null;
@@ -310,14 +291,12 @@ public class ImageFetcher extends ImageResizer {
         return false;
     }
 
-    /**
-     * Workaround for bug pre-Froyo, see here for more info:
-     * http://android-developers.blogspot.com/2011/09/androids-http-clients.html
-     */
-    public static void disableConnectionReuseIfNecessary() {
-        // HTTP connection reuse which was buggy pre-froyo
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
-            System.setProperty("http.keepAlive", "false");
-        }
+    interface ConnectionChecker {
+        /**
+         * Simple network connection check.
+         */
+        void checkConnection();
+
+        void disableConnectionReuseIfNecessary();
     }
 }

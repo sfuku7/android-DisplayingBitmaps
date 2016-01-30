@@ -35,6 +35,7 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
+import com.example.android.displayingbitmaps.util.AndroidConnectionChecker;
 import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
 import com.example.android.j2objcdisplayingbitmaps.R;
 
@@ -85,7 +86,7 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        mImageFetcher = new ImageFetcher(this,
+        mImageFetcher = new ImageFetcher(new AndroidConnectionChecker(this),
                 new AndroidBitmapFactory(getResources()),
                 new AndroidBitmapDrawableFactory(getResources()),
                 new AndroidMemoryImageCacheFactory(),

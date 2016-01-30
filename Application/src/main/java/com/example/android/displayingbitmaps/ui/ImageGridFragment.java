@@ -42,6 +42,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.android.common.logger.Log;
+import com.example.android.displayingbitmaps.util.AndroidConnectionChecker;
 import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
 import com.example.android.j2objcdisplayingbitmaps.R;
 import com.example.android.displayingbitmaps.provider.Images;
@@ -93,7 +94,7 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        mImageFetcher = new ImageFetcher(getActivity(),
+        mImageFetcher = new ImageFetcher(new AndroidConnectionChecker(getActivity()),
                 new AndroidBitmapFactory(getResources()),
                 new AndroidBitmapDrawableFactory(getResources()),
                 new AndroidMemoryImageCacheFactory(),
