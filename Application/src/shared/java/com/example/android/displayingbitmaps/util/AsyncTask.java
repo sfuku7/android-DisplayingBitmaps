@@ -16,8 +16,6 @@
 
 package com.example.android.displayingbitmaps.util;
 
-//import android.os.Process;
-
 import java.util.ArrayDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -231,7 +229,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private static final int MESSAGE_POST_PROGRESS = 0x2;
 
     //private static final InternalHandler sHandler = new InternalHandler();
-    private final UiThreadAccessor mUiThreadAccessor;
+    private final ThreadOperation mThreadOperation;
 
     private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;
     private final WorkerRunnable<Params, Result> mWorker;
@@ -301,14 +299,13 @@ public abstract class AsyncTask<Params, Progress, Result> {
     /**
      * Creates a new asynchronous task. This constructor must be invoked on the UI thread.
      */
-    public AsyncTask(UiThreadAccessor accessor) {
-        mUiThreadAccessor = accessor;
+    public AsyncTask(ThreadOperation accessor) {
+        mThreadOperation = accessor;
         mWorker = new WorkerRunnable<Params, Result>() {
             public Result call() throws Exception {
                 mTaskInvoked.set(true);
 
-                // TODO
-                //Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                mThreadOperation.setThreadPriority(ThreadOperation.Priority.THREAD_PRIORITY_BACKGROUND);
                 //noinspection unchecked
                 return postResult(doInBackground(mParams));
             }
@@ -339,7 +336,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     private Result postResult(Result result) {
-        mUiThreadAccessor.postResult(this, result);
+        mThreadOperation.postResult(this, result);
         return result;
     }
 
@@ -642,7 +639,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      */
     final void publishProgress(Progress... values) {
         if (!isCancelled()) {
-            mUiThreadAccessor.publishProgress(this, values);
+            mThreadOperation.publishProgress(this, values);
         }
     }
 
@@ -659,7 +656,11 @@ public abstract class AsyncTask<Params, Progress, Result> {
         Params[] mParams;
     }
 
-    public interface UiThreadAccessor {
+    public interface ThreadOperation {
+        enum Priority {
+            THREAD_PRIORITY_BACKGROUND
+        };
+        void setThreadPriority(Priority priority);
         void publishProgress(AsyncTask task, Object... values);
         void postResult(AsyncTask task, Object result);
     }

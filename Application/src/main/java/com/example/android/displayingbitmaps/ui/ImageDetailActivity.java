@@ -43,7 +43,7 @@ import com.example.android.displayingbitmaps.util.AndroidBitmapDrawableFactory;
 import com.example.android.displayingbitmaps.util.AndroidBitmapFactory;
 import com.example.android.displayingbitmaps.util.AndroidDiskEnvironment;
 import com.example.android.displayingbitmaps.util.AndroidMemoryImageCacheFactory;
-import com.example.android.displayingbitmaps.util.AndroidUiThreadAccessor;
+import com.example.android.displayingbitmaps.util.AndroidThreadOperation;
 import com.example.android.displayingbitmaps.util.ImageCache;
 import com.example.android.displayingbitmaps.util.ImageFetcher;
 import com.example.android.displayingbitmaps.util.RetainFragmentFactory;
@@ -90,7 +90,7 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
                 new AndroidBitmapDrawableFactory(getResources()),
                 new AndroidMemoryImageCacheFactory(),
                 new AndroidDiskEnvironment(this),
-                new AndroidUiThreadAccessor(),
+                new AndroidThreadOperation(),
                 longest);
         mImageFetcher.addImageCache(new RetainFragmentFactory(getSupportFragmentManager()), cacheParams);
         mImageFetcher.setImageFadeIn(false);

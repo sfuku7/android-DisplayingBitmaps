@@ -18,8 +18,17 @@ package com.example.android.displayingbitmaps.util;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 
-public class AndroidUiThreadAccessor implements AsyncTask.UiThreadAccessor {
+import com.example.android.common.logger.Log;
+
+public class AndroidThreadOperation implements AsyncTask.ThreadOperation {
+
+    private static final String TAG = "AndroidThreadOperation";
+    @Override
+    public void setThreadPriority(Priority priority) {
+        Process.setThreadPriority(convPriority(priority));
+    }
 
     @Override
     public void publishProgress(final AsyncTask task, final Object... values) {
@@ -43,5 +52,15 @@ public class AndroidUiThreadAccessor implements AsyncTask.UiThreadAccessor {
 
     private static void runOnUiThread(Runnable r) {
         new Handler(Looper.getMainLooper()).post(r);
+    }
+
+    private static int convPriority(Priority priority) {
+        switch (priority) {
+            default:
+                Log.w(TAG, "invalid priority " + priority);
+                /* FALLTHROUGH */
+            case THREAD_PRIORITY_BACKGROUND:
+                return Process.THREAD_PRIORITY_BACKGROUND;
+        }
     }
 }

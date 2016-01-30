@@ -20,8 +20,6 @@ package com.example.android.displayingbitmaps.util;
 import com.example.android.common.logger.Log;
 import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
 
-import java.lang.ref.WeakReference;
-
 /**
  * This class wraps up completing some arbitrary long running work when loading a bitmap to an
  * ImageView. It handles things like using a memory and disk cache, running the work in a background
@@ -48,18 +46,18 @@ public abstract class ImageWorker {
     private final AbstractBitmapDrawableFactory mBitmapDrawableFactory;
     private final MemoryImageCacheFactory mMemoryImageCacheFactory;
     private final DiskEnvironment mDiskEnvironment;
-    private final AsyncTask.UiThreadAccessor mUiThreadAccessor;
+    private final AsyncTask.ThreadOperation mThreadOperation;
 
     protected ImageWorker(AbstractBitmapFactory bitmapFactory,
                           AbstractBitmapDrawableFactory bitmapDrawableFactory,
                           MemoryImageCacheFactory memoryImageCacheFactory,
                           DiskEnvironment env,
-                          AsyncTask.UiThreadAccessor accessor) {
+                          AsyncTask.ThreadOperation accessor) {
         mBitmapFactory = bitmapFactory;
         mBitmapDrawableFactory = bitmapDrawableFactory;
         mMemoryImageCacheFactory = memoryImageCacheFactory;
         mDiskEnvironment = env;
-        mUiThreadAccessor = accessor;
+        mThreadOperation = accessor;
     }
 
     /**
@@ -93,7 +91,7 @@ public abstract class ImageWorker {
             }
         } else if (cancelPotentialWork(data, imageView)) {
             //BEGIN_INCLUDE(execute_background_task)
-            final BitmapWorkerTask task = new BitmapWorkerTask(mUiThreadAccessor, data, imageView, listener);
+            final BitmapWorkerTask task = new BitmapWorkerTask(mThreadOperation, data, imageView, listener);
             imageView.setAsyncDrawable(mLoadingBitmap, task);
 
             // NOTE: This uses a custom version of AsyncTask that has been pulled from the
@@ -147,7 +145,7 @@ public abstract class ImageWorker {
                               ImageCache.ImageCacheParams cacheParams) {
         mImageCacheParams = cacheParams;
         mImageCache = ImageCache.getInstance(objectHolderFactory, mMemoryImageCacheFactory, mBitmapFactory, mImageCacheParams);
-        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_INIT_DISK_CACHE);
+        new CacheAsyncTask(mThreadOperation).execute(MESSAGE_INIT_DISK_CACHE);
     }
 
     /**
@@ -160,7 +158,7 @@ public abstract class ImageWorker {
     public void addImageCache(ImageCache.ObjectHolderFactory objectHolderFactory, String diskCacheDirectoryPath) {
         mImageCacheParams = new ImageCache.ImageCacheParams(mDiskEnvironment, diskCacheDirectoryPath);
         mImageCache = ImageCache.getInstance(objectHolderFactory, mMemoryImageCacheFactory, mBitmapFactory, mImageCacheParams);
-        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_INIT_DISK_CACHE);
+        new CacheAsyncTask(mThreadOperation).execute(MESSAGE_INIT_DISK_CACHE);
     }
 
     /**
@@ -254,14 +252,14 @@ public abstract class ImageWorker {
         private final AbstractImageView mImageView;
         private final OnImageLoadedListener mOnImageLoadedListener;
 
-        public BitmapWorkerTask(UiThreadAccessor accessor, Object data, AbstractImageView imageView) {
+        public BitmapWorkerTask(ThreadOperation accessor, Object data, AbstractImageView imageView) {
             super(accessor);
             mData = data;
             mImageView = imageView;
             mOnImageLoadedListener = null;
         }
 
-        public BitmapWorkerTask(UiThreadAccessor accessor, Object data, AbstractImageView imageView, OnImageLoadedListener listener) {
+        public BitmapWorkerTask(ThreadOperation accessor, Object data, AbstractImageView imageView, OnImageLoadedListener listener) {
             super(accessor);
             mData = data;
             mImageView = imageView;
@@ -433,7 +431,7 @@ public abstract class ImageWorker {
 
     protected class CacheAsyncTask extends AsyncTask<Object, Void, Void> {
 
-        CacheAsyncTask(UiThreadAccessor accessor) {
+        CacheAsyncTask(ThreadOperation accessor) {
             super(accessor);
         }
 
@@ -483,15 +481,15 @@ public abstract class ImageWorker {
     }
 
     public void clearCache() {
-        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_CLEAR);
+        new CacheAsyncTask(mThreadOperation).execute(MESSAGE_CLEAR);
     }
 
     public void flushCache() {
-        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_FLUSH);
+        new CacheAsyncTask(mThreadOperation).execute(MESSAGE_FLUSH);
     }
 
     public void closeCache() {
-        new CacheAsyncTask(mUiThreadAccessor).execute(MESSAGE_CLOSE);
+        new CacheAsyncTask(mThreadOperation).execute(MESSAGE_CLOSE);
     }
 
 }

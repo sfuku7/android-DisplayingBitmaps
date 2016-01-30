@@ -20,8 +20,6 @@ package com.example.android.displayingbitmaps.util;
 import com.example.android.common.logger.Log;
 import com.example.android.j2objcdisplayingbitmaps.BuildConfig;
 
-import java.io.FileDescriptor;
-
 /**
  * A simple subclass of {@link ImageWorker} that resizes images from resources given a target width
  * and height. Useful for when the input images might be too large to simply load directly into
@@ -43,7 +41,7 @@ public class ImageResizer extends ImageWorker {
                         AbstractBitmapDrawableFactory bitmapDrawableFactory,
                         MemoryImageCacheFactory memoryImageCacheFactory,
                         DiskEnvironment diskEnvironment,
-                        AsyncTask.UiThreadAccessor accessor,
+                        AsyncTask.ThreadOperation accessor,
                         int imageWidth, int imageHeight) {
         super(bitmapFactory, bitmapDrawableFactory, memoryImageCacheFactory, diskEnvironment, accessor);
         setImageSize(imageWidth, imageHeight);
@@ -58,7 +56,7 @@ public class ImageResizer extends ImageWorker {
     public ImageResizer(AbstractBitmapFactory bitmapFactory,
                         AbstractBitmapDrawableFactory bitmapDrawableFactory,
                         MemoryImageCacheFactory memoryImageCacheFactory,
-                        DiskEnvironment diskEnvironment, AsyncTask.UiThreadAccessor accessor, int imageSize) {
+                        DiskEnvironment diskEnvironment, AsyncTask.ThreadOperation accessor, int imageSize) {
         super(bitmapFactory, bitmapDrawableFactory, memoryImageCacheFactory, diskEnvironment, accessor);
         setImageSize(imageSize);
     }

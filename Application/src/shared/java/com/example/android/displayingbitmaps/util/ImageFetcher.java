@@ -64,7 +64,7 @@ public class ImageFetcher extends ImageResizer {
                         AbstractBitmapDrawableFactory bitmapDrawableFactory,
                         MemoryImageCacheFactory memoryImageCacheFactory,
                         DiskEnvironment diskEnvironment,
-                        AsyncTask.UiThreadAccessor accessor,
+                        AsyncTask.ThreadOperation accessor,
                         int imageWidth, int imageHeight) {
         super(bitmapFactory, bitmapDrawableFactory, memoryImageCacheFactory, diskEnvironment, accessor, imageWidth, imageHeight);
         init(context, diskEnvironment);
@@ -81,7 +81,7 @@ public class ImageFetcher extends ImageResizer {
                         AbstractBitmapDrawableFactory bitmapDrawableFactory,
                         MemoryImageCacheFactory memoryImageCacheFactory,
                         DiskEnvironment diskEnvironment,
-                        AsyncTask.UiThreadAccessor accessor,
+                        AsyncTask.ThreadOperation accessor,
                         int imageSize) {
         super(bitmapFactory, bitmapDrawableFactory, memoryImageCacheFactory, diskEnvironment, accessor, imageSize);
         init(context, diskEnvironment);

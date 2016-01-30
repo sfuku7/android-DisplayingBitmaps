@@ -50,7 +50,7 @@ import com.example.android.displayingbitmaps.util.AndroidBitmapFactory;
 import com.example.android.displayingbitmaps.util.AndroidDiskEnvironment;
 import com.example.android.displayingbitmaps.util.AndroidImageView;
 import com.example.android.displayingbitmaps.util.AndroidMemoryImageCacheFactory;
-import com.example.android.displayingbitmaps.util.AndroidUiThreadAccessor;
+import com.example.android.displayingbitmaps.util.AndroidThreadOperation;
 import com.example.android.displayingbitmaps.util.ImageCache;
 import com.example.android.displayingbitmaps.util.ImageFetcher;
 import com.example.android.displayingbitmaps.util.RetainFragmentFactory;
@@ -97,7 +97,7 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
                 new AndroidBitmapFactory(getResources()),
                 new AndroidBitmapDrawableFactory(getResources()),
                 new AndroidMemoryImageCacheFactory(),
-                new AndroidDiskEnvironment(getActivity()), new AndroidUiThreadAccessor(), mImageThumbSize);
+                new AndroidDiskEnvironment(getActivity()), new AndroidThreadOperation(), mImageThumbSize);
         mImageFetcher.setLoadingImage(R.drawable.empty_photo);
         FragmentManager fm = getActivity().getSupportFragmentManager();
         mImageFetcher.addImageCache(new RetainFragmentFactory(fm), cacheParams);
