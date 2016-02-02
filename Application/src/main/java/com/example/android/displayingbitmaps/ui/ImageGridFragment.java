@@ -99,7 +99,7 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
                 new AndroidBitmapDrawableFactory(getResources()),
                 new AndroidMemoryImageCacheFactory(),
                 new AndroidDiskEnvironment(getActivity()), new AndroidThreadOperation(), mImageThumbSize);
-        mImageFetcher.setLoadingImage(R.drawable.empty_photo);
+        mImageFetcher.setLoadingImage(String.valueOf(R.drawable.empty_photo));
         FragmentManager fm = getActivity().getSupportFragmentManager();
         mImageFetcher.addImageCache(new RetainFragmentFactory(fm), cacheParams);
     }

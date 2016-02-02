@@ -131,7 +131,7 @@ public abstract class ImageWorker {
      *
      * @param resId
      */
-    public void setLoadingImage(int resId) {
+    public void setLoadingImage(String resId) {
         mLoadingBitmap = mBitmapFactory.decodeResource(resId);
     }
 

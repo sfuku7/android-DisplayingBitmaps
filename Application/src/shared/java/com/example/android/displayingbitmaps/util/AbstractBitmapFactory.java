@@ -7,7 +7,7 @@ import java.io.FileDescriptor;
  */
 public interface AbstractBitmapFactory {
 
-    AbstractBitmap decodeResource(int resId);
+    AbstractBitmap decodeResource(String resId);
 
     /**
      * Decode and sample down a bitmap from resources to the requested width and height.
@@ -20,7 +20,7 @@ public interface AbstractBitmapFactory {
      * @return A bitmap sampled down from the original with the same aspect ratio and dimensions
      *         that are equal to or greater than the requested width and height
      */
-    AbstractBitmap decodeSampledBitmapFromResource(int resId,
+    AbstractBitmap decodeSampledBitmapFromResource(String resId,
                                                    int reqWidth, int reqHeight,
                                                    ImageCache cache);
 

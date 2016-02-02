@@ -6,12 +6,15 @@ public class AndroidBitmapDrawable implements AbstractBitmapDrawable {
 
     public final BitmapDrawable bitmapDrawable;
 
+    private final AndroidBitmap mAndroidBitmap;
+
     public AndroidBitmapDrawable(BitmapDrawable d) {
         bitmapDrawable = d;
+        mAndroidBitmap = new AndroidBitmap(bitmapDrawable.getBitmap());
     }
 
     @Override
     public AbstractBitmap getBitmap() {
-        return new AndroidBitmap(bitmapDrawable.getBitmap());
+        return mAndroidBitmap;
     }
 }

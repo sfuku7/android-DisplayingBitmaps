@@ -18,17 +18,25 @@ public class AndroidBitmapFactory implements AbstractBitmapFactory {
         mResources = res;
     }
     @Override
-    public AbstractBitmap decodeResource(int resId) {
+    public AbstractBitmap decodeResource(String resIdString) {
+        Integer resId = Integer.parseInt(resIdString);
+        if (resId == null) {
+            return null;
+        }
         Bitmap bitmap = BitmapFactory.decodeResource(mResources, resId);
         return bitmap != null ? new AndroidBitmap(bitmap) : null;
     }
 
     @Override
-    public AbstractBitmap decodeSampledBitmapFromResource(int resId, int reqWidth, int reqHeight, ImageCache cache) {
+    public AbstractBitmap decodeSampledBitmapFromResource(String resIdString, int reqWidth, int reqHeight, ImageCache cache) {
         // BEGIN_INCLUDE (read_bitmap_dimensions)
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
+        Integer resId = Integer.parseInt(resIdString);
+        if (resId == null) {
+            return null;
+        }
         BitmapFactory.decodeResource(mResources, resId, options);
 
         // Calculate inSampleSize

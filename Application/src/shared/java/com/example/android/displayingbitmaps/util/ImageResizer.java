@@ -88,7 +88,7 @@ public class ImageResizer extends ImageWorker {
      * @param resId
      * @return
      */
-    private AbstractBitmap processBitmap(int resId) {
+    private AbstractBitmap processBitmap(String resId) {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "processBitmap - " + resId);
         }
@@ -97,7 +97,7 @@ public class ImageResizer extends ImageWorker {
 
     @Override
     protected AbstractBitmap processBitmap(Object data) {
-        return processBitmap(Integer.parseInt(String.valueOf(data)));
+        return processBitmap(String.valueOf(data));
     }
 
     /**
